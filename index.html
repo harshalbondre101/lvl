@@ -5,18 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Productivity App</title>
   <script src="https://cdn.tailwindcss.com/3.4.1"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .swipe-container {
+      position: relative;
+      overflow: hidden;
+    }
+    .swipe-content {
+      transition: transform 0.3s ease;
+    }
+    .swipe-delete {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 60px;
+      background-color: #ef4444;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-gray-200 font-sans antialiased">
   <div class="max-w-md mx-auto min-h-screen flex flex-col">
     <!-- Header: Level and EXP -->
     <div class="bg-gray-800 text-gray-200 p-2 sticky top-0 z-10 shadow-md">
-      <h1 class="text-base font-medium flex items-center gap-1.5">
+      <h1 class="text-base font-semibold flex items-center gap-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
         Level <span id="level">0</span>
       </h1>
       <div class="text-xs mt-1">EXP: <span id="exp">0</span>/<span id="exp-required">40</span></div>
-      <div class="w-full bg-gray-700 rounded-full h-1.5 mt-1">
-        <div id="exp-progress" class="bg-gray-500 h-1.5 rounded-full transition-all duration-200" style="width: 0%"></div>
+      <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1">
+        <div id="exp-progress" class="bg-blue-500 h-1.5 rounded-full transition-all duration-200" style="width: 0%"></div>
       </div>
     </div>
 
@@ -26,15 +51,15 @@
     <!-- Task Section -->
     <div class="flex-1 p-2 space-y-2">
       <div class="bg-gray-800 p-2 rounded-lg shadow-sm">
-        <input id="task-title" type="text" placeholder="Task Title" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-        <textarea id="task-desc" placeholder="Description" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg mt-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"></textarea>
+        <input id="task-title" type="text" placeholder="Task Title" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <textarea id="task-desc" placeholder="Description" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg mt-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
         <div class="flex gap-1 mt-1">
-          <select id="task-priority" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
+          <select id="task-priority" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
           </select>
-          <select id="task-category" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          <select id="task-category" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="Mind">Mind</option>
             <option value="Brain">Brain</option>
             <option value="Health">Health</option>
@@ -43,8 +68,8 @@
           </select>
         </div>
         <div class="flex gap-1 mt-1">
-          <input id="task-deadline" type="date" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-          <select id="task-recurrence" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          <input id="task-deadline" type="date" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+          <select id="task-recurrence" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="None">None</option>
             <option value="Daily">Daily</option>
             <option value="Weekly">Weekly</option>
@@ -52,12 +77,32 @@
             <option value="Yearly">Yearly</option>
           </select>
         </div>
+        <div class="mt-1">
+          <label class="text-xs">Streak Days</label>
+          <input id="task-streak-days" type="number" min="1" value="1" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
         <button onclick="addTask()" class="w-full bg-gray-600 text-gray-200 p-1.5 rounded-lg mt-1 hover:bg-gray-500 transition text-xs flex items-center justify-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           Add Task
         </button>
       </div>
-      <div id="task-list" class="space-y-2"></div>
+      <div id="task-list" class="grid gap-2"></div>
+    </div>
+
+    <!-- Add Note Button -->
+    <button id="add-note-btn" class="fixed bottom-16 right-4 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition z-20" onclick="openNotePopup()">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+    </button>
+
+    <!-- Note Popup -->
+    <div id="note-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+      <div class="bg-gray-800 p-4 rounded-lg w-11/12 max-w-sm">
+        <h2 class="text-sm font-medium mb-2">Add Note</h2>
+        <textarea id="note-content" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="5" oninput="autoSaveNote()"></textarea>
+        <div class="flex gap-2 mt-2">
+          <button onclick="closeNotePopup()" class="flex-1 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-xs">Close</button>
+        </div>
+      </div>
     </div>
 
     <!-- Pomodoro Timer -->
@@ -74,31 +119,44 @@
       </div>
     </div>
 
-    <!-- Sidebar: Analytics & History -->
+    <!-- Sidebar: Analytics, History & Notes -->
     <button class="fixed top-2 right-2 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-xs z-20 flex items-center gap-1.5" onclick="toggleSidebar()">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
       Menu
     </button>
-    <div id="sidebar" class="fixed top-0 right-[-100%] w-4/5 max-w-xs h-full bg-gray-800 shadow-lg p-2 transition-all duration-300 overflow-y-auto">
+    <div id="sidebar" class="fixed top-0 right-[-100%] w-4/5 max-w-xs h-full bg-gray-800 shadow-lg pt-12 p-2 transition-all duration-300 overflow-y-auto">
       <div class="flex gap-1 mb-2">
         <button onclick="showAnalytics()" class="flex-1 bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600">Analytics</button>
         <button onclick="showHistory()" class="flex-1 bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600">History</button>
+        <button onclick="showNotes()" class="flex-1 bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600">Notes</button>
+      </div>
+      <div class="mb-2">
+        <button onclick="toggleTasksPerRow()" class="w-full bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600 flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+          <span id="tasks-per-row-text">2 Tasks/Row</span>
+        </button>
+      </div>
+      <div class="mb-2">
+        <button onclick="confirmReset()" class="w-full bg-red-600 text-gray-200 p-1.5 rounded-lg hover:bg-red-700 transition text-xs flex items-center justify-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5-4h4M10 10v6m4-6v6"></path></svg>
+          Reset All Data
+        </button>
       </div>
       <div id="analytics-section">
-        <h2 class="text-base font-medium mb-2">Analytics</h2>
+        <h2 class="text-base font-semibold mb-2">Analytics</h2>
         <h3 class="text-xs font-medium">Settings</h3>
         <div class="space-y-1 mb-2">
           <div>
             <label class="text-xs">Work (min)</label>
-            <input id="pomodoro-work" type="number" min="1" value="25" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <input id="pomodoro-work" type="number" min="1" value="25" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
           <div>
             <label class="text-xs">Short Break (min)</label>
-            <input id="pomodoro-short-break" type="number" min="1" value="5" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <input id="pomodoro-short-break" type="number" min="1" value="5" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
           <div>
             <label class="text-xs">Long Break (min)</label>
-            <input id="pomodoro-long-break" type="number" min="1" value="15" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <input id="pomodoro-long-break" type="number" min="1" value="15" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
           </div>
           <button onclick="saveSettings()" class="w-full bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-xs flex items-center justify-center gap-1.5">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -118,13 +176,17 @@
         <p class="text-[0.65rem]">EXP Earned: <span id="monthly-exp">0</span></p>
       </div>
       <div id="history-section" class="hidden">
-        <h2 class="text-base font-medium mb-2">History</h2>
-        <input id="history-date" type="date" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        <h2 class="text-base font-semibold mb-2">History</h2>
+        <input id="history-date" type="date" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
         <button onclick="loadHistory()" class="w-full bg-gray-600 text-gray-200 p-1.5 rounded-lg mt-1 hover:bg-gray-500 transition text-xs flex items-center justify-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
           Load Week
         </button>
         <div id="history-tasks" class="mt-2 space-y-1"></div>
+      </div>
+      <div id="notes-section" class="hidden">
+        <h2 class="text-base font-semibold mb-2">Notes</h2>
+        <div id="notes-list" class="space-y-2"></div>
       </div>
     </div>
   </div>
@@ -137,6 +199,7 @@
       expRequired: 40,
       tasks: [],
       history: [],
+      notes: [],
       pomodoroCount: 0,
       pomodoroSession: 'Work',
       pomodoroTime: 25 * 60,
@@ -150,32 +213,50 @@
       monthlyTasks: 0,
       monthlyExp: 0,
       lastActivityDate: null,
-      streakTasks: {},
       lastPomodoroDate: null,
-      stagnationDays: 0
+      stagnationDays: 0,
+      tasksPerRow: 2
     };
 
     // Load from localStorage
     function loadState() {
       const saved = localStorage.getItem('productivityApp');
       if (saved) {
-        user = JSON.parse(saved);
-        // Ensure critical properties are initialized
-        user.settings = user.settings || { work: 25, shortBreak: 5, longBreak: 15 };
-        user.history = user.history || [];
-        user.tasks = user.tasks || [];
-        user.streakTasks = user.streakTasks || {};
-        document.getElementById('pomodoro-work').value = user.settings.work;
-        document.getElementById('pomodoro-short-break').value = user.settings.shortBreak;
-        document.getElementById('pomodoro-long-break').value = user.settings.longBreak;
-        updateUI();
-        checkDailyPenalties();
+        try {
+          const parsed = JSON.parse(saved);
+          user = {
+            ...user,
+            ...parsed,
+            settings: parsed.settings || { work: 25, shortBreak: 5, longBreak: 15 },
+            history: parsed.history || [],
+            tasks: parsed.tasks || [],
+            notes: parsed.notes || [],
+            tasksPerRow: parsed.tasksPerRow || 2
+          };
+          document.getElementById('pomodoro-work').value = user.settings.work;
+          document.getElementById('pomodoro-short-break').value = user.settings.shortBreak;
+          document.getElementById('pomodoro-long-break').value = user.settings.longBreak;
+          document.getElementById('tasks-per-row-text').textContent = user.tasksPerRow === 1 ? '1 Task/Row' : '2 Tasks/Row';
+          updateUI();
+          checkDailyPenalties();
+          showHistory();
+        } catch (e) {
+          console.error('Failed to parse localStorage:', e);
+          saveState();
+        }
+      } else {
+        saveState();
       }
     }
 
-    // Save to localStorage
+    // Save to localStorage with error handling
     function saveState() {
-      localStorage.setItem('productivityApp', JSON.stringify(user));
+      try {
+        localStorage.setItem('productivityApp', JSON.stringify(user));
+      } catch (e) {
+        console.error('Failed to save to localStorage:', e);
+        showNotification('Error saving data. Please check storage settings.', false);
+      }
     }
 
     // Save Settings
@@ -188,7 +269,49 @@
       user.pomodoroCount = 0;
       updatePomodoroUI();
       saveState();
-      showNotification('Settings saved');
+      showNotification('Settings saved', true);
+    }
+
+    // Reset All Data
+    function confirmReset() {
+      if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
+        localStorage.removeItem('productivityApp');
+        user = {
+          level: 0,
+          exp: 0,
+          expRequired: 40,
+          tasks: [],
+          history: [],
+          notes: [],
+          pomodoroCount: 0,
+          pomodoroSession: 'Work',
+          pomodoroTime: 25 * 60,
+          settings: { work: 25, shortBreak: 5, longBreak: 15 },
+          dailyTasks: 0,
+          dailyExp: 0,
+          dailyPomodoro: 0,
+          weeklyTasks: 0,
+          weeklyExp: 0,
+          weeklyStreak: 0,
+          monthlyTasks: 0,
+          monthlyExp: 0,
+          lastActivityDate: null,
+          lastPomodoroDate: null,
+          stagnationDays: 0,
+          tasksPerRow: 2
+        };
+        saveState();
+        updateUI();
+        showNotification('All data reset', true);
+      }
+    }
+
+    // Toggle Tasks Per Row
+    function toggleTasksPerRow() {
+      user.tasksPerRow = user.tasksPerRow === 1 ? 2 : 1;
+      document.getElementById('tasks-per-row-text').textContent = user.tasksPerRow === 1 ? '1 Task/Row' : '2 Tasks/Row';
+      saveState();
+      updateUI();
     }
 
     // Calculate EXP needed for next level
@@ -215,6 +338,7 @@
       const category = document.getElementById('task-category').value;
       const deadline = document.getElementById('task-deadline').value;
       const recurrence = document.getElementById('task-recurrence').value;
+      const streakDays = parseInt(document.getElementById('task-streak-days').value) || 1;
 
       if (!title) return alert('Task title is required');
 
@@ -226,6 +350,10 @@
         category,
         deadline: deadline ? new Date(deadline).toISOString() : null,
         recurrence,
+        streakDays: Math.max(1, streakDays),
+        streakCurrent: 0,
+        streakLastDate: null,
+        streakCount: 0,
         subtasks: [],
         completed: false,
         completedOnce: false,
@@ -234,62 +362,109 @@
 
       user.tasks.push(task);
       user.history.push({ ...task, historyId: Date.now() });
-      if (!user.streakTasks[category]) user.streakTasks[category] = { days: 0, lastDate: null };
       saveState();
       updateUI();
       document.getElementById('task-title').value = '';
       document.getElementById('task-desc').value = '';
       document.getElementById('task-deadline').value = '';
       document.getElementById('task-recurrence').value = 'None';
+      document.getElementById('task-streak-days').value = '1';
     }
 
     // Render Tasks
     function renderTasks() {
       const taskList = document.getElementById('task-list');
+      taskList.className = `grid gap-2 grid-cols-${user.tasksPerRow}`;
       taskList.innerHTML = '';
-      user.tasks.forEach(task => {
+      // Sort tasks: incomplete first, then by priority (High > Medium > Low)
+      const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+      const sortedTasks = user.tasks.sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed - b.completed;
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      });
+      sortedTasks.forEach(task => {
         const taskItem = document.createElement('div');
-        taskItem.className = 'bg-gray-800 p-2 rounded-lg shadow-sm';
+        taskItem.className = `swipe-container bg-gray-800 p-2 rounded-lg shadow-sm ${task.completed ? 'swipeable' : ''}`;
+        taskItem.id = `task-${task.id}`;
         const completedSubtasks = task.subtasks.filter(s => s.completed).length;
         const subtaskProgress = task.subtasks.length ? (completedSubtasks / task.subtasks.length) * 100 : 100;
-        const streakProgress = user.streakTasks[task.category] ? (user.streakTasks[task.category].days / 7) * 100 : 0;
+        const streakProgress = task.streakDays > 1 ? (task.streakCurrent / task.streakDays) * 100 : 0;
         taskItem.innerHTML = `
-          <div class="flex justify-between">
-            <h3 class="text-xs font-medium ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h3>
-            <span class="text-[0.65rem] text-gray-400">${task.priority}</span>
+          <div class="swipe-content">
+            <div class="flex justify-between">
+              <h3 class="text-xs font-medium ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h3>
+              <span class="text-[0.65rem] text-gray-400">${task.priority}</span>
+            </div>
+            <p class="text-[0.65rem] text-gray-400">${task.desc}</p>
+            <p class="text-[0.65rem] text-gray-400">Category: ${task.category}</p>
+            <p class="text-[0.65rem] text-gray-400">Deadline: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'None'}</p>
+            <p class="text-[0.65rem] text-gray-400">Recurrence: ${task.recurrence}</p>
+            <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1">
+              <div class="${task.completed ? 'bg-green-500' : 'bg-blue-500'} h-1.5 rounded-full" style="width: ${subtaskProgress}%"></div>
+            </div>
+            ${task.streakDays > 1 ? `
+              <p class="text-[0.65rem] text-gray-400 mt-1">Streak: ${task.streakCurrent}/${task.streakDays} days</p>
+              <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1">
+                <div class="bg-blue-500 h-1.5 rounded-full" style="width: ${streakProgress}%"></div>
+              </div>
+            ` : ''}
+            <div class="flex gap-1 mt-1">
+              <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="flex-1 p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-[0.65rem] text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <button onclick="addSubtask(${task.id})" class="bg-gray-600 text-gray-200 px-2 py-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Add
+              </button>
+            </div>
+            <div class="flex gap-1 mt-1">
+              <button onclick="completeTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                ${task.completed ? 'Undo' : 'Complete'}
+              </button>
+              <button onclick="deleteTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                Delete
+              </button>
+            </div>
+            <div id="subtasks-${task.id}" class="mt-1 space-y-1"></div>
           </div>
-          <p class="text-[0.65rem] text-gray-400">${task.desc}</p>
-          <p class="text-[0.65rem] text-gray-400">Category: ${task.category}</p>
-          <p class="text-[0.65rem] text-gray-400">Deadline: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'None'}</p>
-          <p class="text-[0.65rem] text-gray-400">Recurrence: ${task.recurrence}</p>
-          <div class="w-full bg-gray-700 rounded-full h-1.5 mt-1">
-            <div class="bg-gray-500 h-1.5 rounded-full" style="width: ${subtaskProgress}%"></div>
-          </div>
-          <p class="text-[0.65rem] text-gray-400 mt-1">Streak: ${user.streakTasks[task.category]?.days || 0}/7 days</p>
-          <div class="w-full bg-gray-700 rounded-full h-1.5 mt-1">
-            <div class="bg-gray-500 h-1.5 rounded-full" style="width: ${streakProgress}%"></div>
-          </div>
-          <div class="flex gap-1 mt-1">
-            <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="flex-1 p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-[0.65rem] text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-            <button onclick="addSubtask(${task.id})" class="bg-gray-600 text-gray-200 px-2 py-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-              Add
-            </button>
-          </div>
-          <div class="flex gap-1 mt-1">
-            <button onclick="completeTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-              ${task.completed ? 'Undo' : 'Complete'}
-            </button>
-            <button onclick="deleteTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-              Delete
-            </button>
-          </div>
-          <div id="subtasks-${task.id}" class="mt-1 space-y-1"></div>
+          ${task.completed ? `
+            <div class="swipe-delete">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </div>
+          ` : ''}
         `;
         taskList.appendChild(taskItem);
         renderSubtasks(task.id);
+        if (task.completed) {
+          addSwipeListener(taskItem, task.id);
+        }
+      });
+    }
+
+    // Add Swipe to Delete
+    function addSwipeListener(element, taskId) {
+      let startX = 0;
+      let currentX = 0;
+      const swipeContent = element.querySelector('.swipe-content');
+      
+      element.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+      });
+
+      element.addEventListener('touchmove', (e) => {
+        currentX = e.touches[0].clientX;
+        const diff = startX - currentX;
+        if (diff > 0) {
+          swipeContent.style.transform = `translateX(-${Math.min(diff, 60)}px)`;
+        }
+      });
+
+      element.addEventListener('touchend', () => {
+        const diff = startX - currentX;
+        if (diff > 30) {
+          deleteTask(taskId);
+        }
+        swipeContent.style.transform = 'translateX(0)';
       });
     }
 
@@ -314,7 +489,7 @@
         const subtaskItem = document.createElement('div');
         subtaskItem.className = 'flex items-center gap-1';
         subtaskItem.innerHTML = `
-          <input type="checkbox" ${subtask.completed ? 'checked' : ''} onchange="toggleSubtask(${taskId}, ${subtask.id})" class="h-3.5 w-3.5 text-gray-500 focus:ring-gray-500">
+          <input type="checkbox" ${subtask.completed ? 'checked' : ''} onchange="toggleSubtask(${taskId}, ${subtask.id})" class="h-3.5 w-3.5 text-blue-500 focus:ring-blue-500">
           <span class="text-[0.65rem] ${subtask.completed ? 'line-through text-gray-500' : 'text-gray-200'}">${subtask.title}</span>
           <button onclick="deleteSubtask(${taskId}, ${subtask.id})" class="ml-auto text-gray-400 hover:text-gray-300 text-[0.65rem] flex items-center gap-1">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -347,7 +522,7 @@
             user.weeklyExp += 10;
             user.monthlyExp += 10;
             checkLevelUp();
-            updateStreaks(task.category);
+            updateTaskStreak(task);
             handleRecurrence(task);
           }
         }
@@ -392,7 +567,7 @@
         user.weeklyExp += 10;
         user.monthlyExp += 10;
         checkLevelUp();
-        updateStreaks(task.category);
+        updateTaskStreak(task);
         handleRecurrence(task);
       } else if (!task.completed) {
         task.completedOnce = false;
@@ -403,10 +578,55 @@
       updateUI();
     }
 
+    // Update Task Streak
+    function updateTaskStreak(task) {
+      const today = new Date().toDateString();
+      if (task.streakLastDate !== today) {
+        task.streakCurrent = Math.min(task.streakCurrent + 1, task.streakDays);
+        task.streakLastDate = today;
+        task.streakCount += 1;
+        user.weeklyStreak = Math.max(user.weeklyStreak, task.streakCurrent);
+        if (task.streakCurrent >= Math.floor(task.streakDays * 0.7)) {
+          showNotification('You’ve earned a break day for your ' + task.title + ' streak!', true);
+        }
+        if (task.streakCurrent === task.streakDays) {
+          task.streakCurrent = 0;
+          task.streakCount = 0;
+        }
+      }
+      // Auto-repeat task until streakDays is reached
+      if (task.streakCount < task.streakDays && task.completed) {
+        const newTask = {
+          ...task,
+          id: Date.now(),
+          historyId: Date.now(),
+          completed: false,
+          completedOnce: false,
+          completedDate: null,
+          subtasks: task.subtasks.map(s => ({ ...s, id: Date.now(), completed: false, completedOnce: false, lastTouched: new Date().toISOString() })),
+          createdDate: new Date().toISOString()
+        };
+        user.tasks.push(newTask);
+        user.history.push({ ...newTask });
+      }
+      saveState();
+    }
+
     // Handle Recurrence
     function handleRecurrence(task) {
       if (task.recurrence === 'None') return;
-      const newTask = { ...task, id: Date.now(), historyId: Date.now(), completed: false, completedOnce: false, completedDate: null, subtasks: task.subtasks.map(s => ({ ...s, id: Date.now(), completed: false, completedOnce: false, lastTouched: new Date().toISOString() })) };
+      const newTask = {
+        ...task,
+        id: Date.now(),
+        historyId: Date.now(),
+        completed: false,
+        completedOnce: false,
+        completedDate: null,
+        streakCurrent: task.streakCurrent,
+        streakLastDate: task.streakLastDate,
+        streakCount: task.streakCount,
+        subtasks: task.subtasks.map(s => ({ ...s, id: Date.now(), completed: false, completedOnce: false, lastTouched: new Date().toISOString() }))
+      };
       const now = new Date();
       if (task.recurrence === 'Daily') {
         newTask.deadline = new Date(now.setDate(now.getDate() + 1)).toISOString();
@@ -420,6 +640,7 @@
       newTask.createdDate = new Date().toISOString();
       user.tasks.push(newTask);
       user.history.push({ ...newTask });
+      saveState();
     }
 
     // Delete Task
@@ -436,22 +657,82 @@
         user.exp -= user.expRequired;
         user.expRequired = getExpRequired(user.level);
       }
+      saveState();
     }
 
-    // Update Streaks
-    function updateStreaks(category) {
-      const today = new Date().toDateString();
-      if (user.streakTasks[category].lastDate !== today) {
-        user.streakTasks[category].days = Math.min(user.streakTasks[category].days + 1, 7);
-        user.streakTasks[category].lastDate = today;
-        user.weeklyStreak = Math.max(user.weeklyStreak, user.streakTasks[category].days);
-        if (user.streakTasks[category].days >= 5) {
-          showNotification('You’ve earned a break day for your ' + category + ' streak!');
-        }
-        if (user.streakTasks[category].days === 7) {
-          user.streakTasks[category].days = 0;
-        }
+    // Note Functions
+    let currentNoteId = null;
+    function openNotePopup(noteId = null) {
+      currentNoteId = noteId;
+      const popup = document.getElementById('note-popup');
+      const content = document.getElementById('note-content');
+      if (noteId) {
+        const note = user.notes.find(n => n.id === noteId);
+        content.value = note.content;
+      } else {
+        content.value = '';
       }
+      popup.classList.remove('hidden');
+    }
+
+    function closeNotePopup() {
+      document.getElementById('note-popup').classList.add('hidden');
+      currentNoteId = null;
+      renderNotes();
+    }
+
+    function autoSaveNote() {
+      const content = document.getElementById('note-content').value;
+      if (content.trim()) {
+        if (currentNoteId) {
+          const note = user.notes.find(n => n.id === currentNoteId);
+          note.content = content;
+          note.timestamp = new Date().toISOString();
+        } else {
+          user.notes.push({
+            id: Date.now(),
+            content,
+            timestamp: new Date().toISOString()
+          });
+          user.exp += 2;
+          user.dailyExp += 2;
+          user.weeklyExp += 2;
+          user.monthlyExp += 2;
+          checkLevelUp();
+          showNotification('Note added. +2 EXP', true);
+        }
+        saveState();
+      }
+    }
+
+    function deleteNote(noteId) {
+      user.notes = user.notes.filter(n => n.id !== noteId);
+      saveState();
+      renderNotes();
+    }
+
+    function renderNotes() {
+      const notesList = document.getElementById('notes-list');
+      notesList.innerHTML = '';
+      user.notes.forEach(note => {
+        const noteItem = document.createElement('div');
+        noteItem.className = 'bg-gray-700 p-2 rounded-lg text-[0.65rem]';
+        noteItem.innerHTML = `
+          <p class="text-gray-400">Created: ${new Date(note.timestamp).toLocaleString()}</p>
+          <p class="text-gray-200">${note.content}</p>
+          <div class="flex gap-1 mt-1">
+            <button onclick="openNotePopup(${note.id})" class="flex-1 bg-gray-600 text-gray-200 p-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.414H9v-2.828l8.586-8.586z"></path></svg>
+              Edit
+            </button>
+            <button onclick="deleteNote(${note.id})" class="flex-1 bg-gray-600 text-gray-200 p-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Delete
+            </button>
+          </div>
+        `;
+        notesList.appendChild(noteItem);
+      });
     }
 
     // Pomodoro Timer
@@ -493,7 +774,7 @@
       user.pomodoroCount = 0;
       user.exp -= 1;
       user.dailyExp -= 1;
-      showNotification('Pomodoro canceled. -1 EXP');
+      showNotification('Pomodoro canceled. -1 EXP', false);
       updatePomodoroUI();
       saveState();
     }
@@ -529,13 +810,25 @@
     function showAnalytics() {
       document.getElementById('analytics-section').classList.remove('hidden');
       document.getElementById('history-section').classList.add('hidden');
+      document.getElementById('notes-section').classList.add('hidden');
     }
 
     // Show History
     function showHistory() {
       document.getElementById('analytics-section').classList.add('hidden');
       document.getElementById('history-section').classList.remove('hidden');
+      document.getElementById('notes-section').classList.add('hidden');
+      const today = new Date();
+      document.getElementById('history-date').value = today.toISOString().split('T')[0];
       loadHistory();
+    }
+
+    // Show Notes
+    function showNotes() {
+      document.getElementById('analytics-section').classList.add('hidden');
+      document.getElementById('history-section').classList.add('hidden');
+      document.getElementById('notes-section').classList.remove('hidden');
+      renderNotes();
     }
 
     // Load History
@@ -565,9 +858,10 @@
     }
 
     // Notifications
-    function showNotification(message) {
+    function showNotification(message, isPositive = true) {
       const notification = document.getElementById('notification');
       notification.textContent = message;
+      notification.className = `bg-${isPositive ? 'gray-700' : 'red-600'} text-gray-200 p-2 rounded-lg mx-2 mt-2 text-xs`;
       notification.classList.remove('hidden');
       setTimeout(() => notification.classList.add('hidden'), 3000);
     }
@@ -580,34 +874,23 @@
         if (hasTasks) {
           user.exp -= 5;
           user.dailyExp -= 5;
-          showNotification('Missed tasks yesterday. -5 EXP');
+          showNotification('Missed tasks yesterday. -5 EXP', false);
         } else if (user.dailyTasks > 0) {
           user.exp += 5;
           user.dailyExp += 5;
-          showNotification('Daily check-in bonus: +5 EXP');
+          showNotification('Daily check-in bonus: +5 EXP', true);
         }
         if (user.lastPomodoroDate !== today && user.dailyPomodoro === 0) {
           user.exp -= 2;
           user.dailyExp -= 2;
-          showNotification('No Pomodoro sessions yesterday. -2 EXP');
+          showNotification('No Pomodoro sessions yesterday. -2 EXP', false);
         }
-        user.streakTasks = Object.keys(user.streakTasks).reduce((acc, category) => {
-          if (user.streakTasks[category].lastDate !== today && user.streakTasks[category].days < 5) {
-            acc[category] = { days: 0, lastDate: null };
-            user.exp -= 3;
-            user.dailyExp -= 3;
-            showNotification(`Broke ${category} streak. -3 EXP`);
-          } else {
-            acc[category] = user.streakTasks[category];
-          }
-          return acc;
-        }, {});
         user.tasks.forEach(task => {
           task.subtasks.forEach(subtask => {
             const lastTouched = new Date(subtask.lastTouched);
             const daysSince = Math.floor((new Date() - lastTouched) / (1000 * 60 * 60 * 24));
             if (daysSince >= 2) {
-              showNotification(`Subtask "${subtask.title}" untouched for 2 days. Reschedule or delete?`);
+              showNotification(`Subtask "${subtask.title}" untouched for 2 days. Reschedule or delete?`, false);
             }
           });
           if (task.deadline && !task.completed) {
@@ -615,14 +898,21 @@
             if (new Date() > deadline) {
               user.exp -= 5;
               user.dailyExp -= 5;
-              showNotification(`Missed deadline for "${task.title}". -5 EXP`);
+              showNotification(`Missed deadline for "${task.title}". -5 EXP`, false);
             }
+          }
+          if (task.streakLastDate !== today && task.streakCurrent < Math.floor(task.streakDays * 0.7)) {
+            task.streakCurrent = 0;
+            task.streakLastDate = null;
+            user.exp -= 3;
+            user.dailyExp -= 3;
+            showNotification(`Broke streak for "${task.title}". -3 EXP`, false);
           }
         });
         if (user.dailyTasks === 0) {
           user.stagnationDays += 1;
           if (user.stagnationDays >= 3) {
-            showNotification('No progress for 3 days. Let’s get back on track!');
+            showNotification('No progress for 3 days. Let’s get back on track!', false);
           }
         } else {
           user.stagnationDays = 0;
@@ -630,7 +920,7 @@
         if (user.weeklyTasks >= 20) {
           user.exp += 50;
           user.weeklyExp += 50;
-          showNotification('Weekly challenge completed! +50 EXP');
+          showNotification('Weekly challenge completed! +50 EXP', true);
         }
         user.dailyTasks = 0;
         user.dailyExp = 0;
