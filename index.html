@@ -1,55 +1,348 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TaskMaster</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.10/babel.min.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity App</title>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.24.7/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" src="App.jsx"></script>
+    <div id="root"></div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            // State management
+            const [level, setLevel] = useState(0);
+            const [exp, setExp] = useState(0);
+            const [tasks, setTasks] = useState([]);
+            const [pomodoro, setPomodoro] = useState({ time: 25 * 60, isRunning: false, isWork: true, sessionCount: 0 });
+            const [streaks, setStreaks] = useState({});
+            const [analytics, setAnalytics] = useState({ daily: [], weekly: [], monthly: [] });
+            const [showSidebar, setShowSidebar] = useState(false);
+            const [notifications, setNotifications] = useState([]);
+
+            // Load data from localStorage
+            useEffect(() => {
+                const savedData = localStorage.getItem('productivityApp');
+                if (savedData) {
+                    const { level, exp, tasks, streaks, analytics } = JSON.parse(savedData);
+                    setLevel(level || 0);
+                    setExp(exp || 0);
+                    setTasks(tasks || []);
+                    setStreaks(streaks || {});
+                    setAnalytics(analytics || { daily: [], weekly: [], monthly: [] });
+                }
+                checkDailyPenalties();
+            }, []);
+
+            // Save data to localStorage
+            useEffect(() => {
+                localStorage.setItem('productivityApp', JSON.stringify({ level, exp, tasks, streaks, analytics }));
+            }, [level, exp, tasks, streaks, analytics]);
+
+            // Pomodoro timer logic
+            useEffect(() => {
+                let timer;
+                if (pomodoro.isRunning && pomodoro.time > 0) {
+                    timer = setInterval(() => {
+                        setPomodoro(prev => ({
+                            ...prev,
+                            time: prev.time - 1
+                        }));
+                    }, 1000);
+                } else if (pomodoro.time === 0) {
+                    if (pomodoro.isWork) {
+                        setExp(prev => prev + 5);
+                        setPomodoro(prev => ({
+                            ...prev,
+                            isWork: false,
+                            time: prev.sessionCount < 3 ? 5 * 60 : 15 * 60,
+                            sessionCount: prev.sessionCount + 1
+                        }));
+                    } else {
+                        setPomodoro(prev => ({
+                            ...prev,
+                            isWork: true,
+                            time: 25 * 60,
+                            sessionCount: prev.sessionCount >= 3 ? 0 : prev.sessionCount
+                        }));
+                    }
+                }
+                return () => clearInterval(timer);
+            }, [pomodoro]);
+
+            // Check for daily penalties and streaks
+            const checkDailyPenalties = () => {
+                const today = new Date().toDateString();
+                const lastCheck = localStorage.getItem('lastCheck');
+                if (lastCheck !== today) {
+                    let penalty = 0;
+                    const incompleteTasks = tasks.filter(task => task.deadline === lastCheck && !task.completed);
+                    if (incompleteTasks.length > 0) penalty += 5;
+                    if (!pomodoro.sessionCount) penalty += 2;
+                    setExp(prev => Math.max(0, prev - penalty));
+                    if (penalty > 0) {
+                        setNotifications(prev => [...prev, `-${penalty} EXP: Missed tasks or Pomodoro sessions`]);
+                    }
+                    localStorage.setItem('lastCheck', today);
+
+                    // Check streaks
+                    Object.keys(streaks).forEach(category => {
+                        if (!tasks.some(task => task.category === category && task.completed && task.deadline === lastCheck)) {
+                            setStreaks(prev => {
+                                const newStreaks = { ...prev };
+                                if (newStreaks[category].streak >= 5) {
+                                    newStreaks[category].canSkip = true;
+                                } else {
+                                    newStreaks[category].streak = 0;
+                                    setExp(prevExp => Math.max(0, prevExp - 3));
+                                    setNotifications(prev => [...prev, `-3 EXP: ${category} streak broken`]);
+                                }
+                                return newStreaks;
+                            });
+                        }
+                    });
+
+                    // Update analytics
+                    setAnalytics(prev => ({
+                        ...prev,
+                        daily: [...prev.daily, { date: today, tasksCompleted: tasks.filter(t => t.completed).length, expChange: exp - penalty }],
+                        weekly: updateWeeklyAnalytics(),
+                        monthly: updateMonthlyAnalytics()
+                    }));
+                }
+            };
+
+            // Level up logic
+            useEffect(() => {
+                const requiredExp = 40 + (level * 10);
+                if (exp >= requiredExp) {
+                    setLevel(prev => prev + 1);
+                    setExp(prev => prev - requiredExp);
+                }
+            }, [exp]);
+
+            // Task management
+            const addTask = (title, description, priority, category, deadline) => {
+                const newTask = {
+                    id: Date.now(),
+                    title,
+                    description,
+                    priority,
+                    category,
+                    deadline,
+                    subtasks: [],
+                    completed: false
+                };
+                setTasks(prev => [...prev, newTask]);
+                setStreaks(prev => ({
+                    ...prev,
+                    [category]: { streak: (prev[category]?.streak || 0) + 1, canSkip: prev[category]?.canSkip || false }
+                }));
+            };
+
+            const completeTask = (taskId) => {
+                setTasks(prev => prev.map(task => {
+                    if (task.id === taskId && task.subtasks.every(st => st.completed)) {
+                        setExp(prevExp => prevExp + 10);
+                        setNotifications(prev => [...prev, `+10 EXP: Completed task "${task.title}"`]);
+                        return { ...task, completed: true };
+                    }
+                    return task;
+                }));
+            };
+
+            const addSubtask = (taskId, title) => {
+                setTasks(prev => prev.map(task => {
+                    if (task.id === taskId) {
+                        return {
+                            ...task,
+                            subtasks: [...task.subtasks, { id: Date.now(), title, completed: false }]
+                        };
+                    }
+                    return task;
+                }));
+            };
+
+            const completeSubtask = (taskId, subtaskId) => {
+                setTasks(prev => prev.map(task => {
+                    if (task.id === taskId) {
+                        const updatedSubtasks = task.subtasks.map(st => 
+                            st.id === subtaskId ? { ...st, completed: true } : st
+                        );
+                        return { ...task, subtasks: updatedSubtasks };
+                    }
+                    return task;
+                }));
+            };
+
+            // Pomodoro controls
+            const startPomodoro = () => setPomodoro(prev => ({ ...prev, isRunning: true }));
+            const pausePomodoro = () => setPomodoro(prev => ({ ...prev, isRunning: false }));
+            const resetPomodoro = () => {
+                setPomodoro(prev => ({ ...prev, isRunning: false, time: 25 * 60, isWork: true }));
+                setExp(prev => Math.max(0, prev - 1));
+                setNotifications(prev => [...prev, `-1 EXP: Pomodoro session cancelled`]);
+            };
+
+            // Analytics calculations
+            const updateWeeklyAnalytics = () => {
+                // Implement weekly analytics aggregation
+                return analytics.weekly;
+            };
+
+            const updateMonthlyAnalytics = () => {
+                // Implement monthly analytics aggregation
+                return analytics.monthly;
+            };
+
+            // Render components
+            return (
+                <div className="min-h-screen bg-gray-100 flex flex-col">
+                    {/* Header with Level and EXP */}
+                    <div className="bg-blue-600 text-white p-4">
+                        <h1 className="text-2xl font-bold">Level {level}</h1>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                            <div 
+                                className="bg-green-600 h-2.5 rounded-full" 
+                                style={{ width: `${(exp / (40 + level * 10)) * 100}%` }}
+                            ></div>
+                        </div>
+                        <p>{exp}/{40 + level * 10} EXP</p>
+                    </div>
+
+                    {/* Notifications */}
+                    {notifications.length > 0 && (
+                        <div className="bg-yellow-100 p-2 text-sm">
+                            {notifications.map((note, index) => (
+                                <p key={index}>{note}</p>
+                            ))}
+                        </div>
+                    )}
+
+                    {/* Task List */}
+                    <div className="flex-1 p-4 overflow-y-auto">
+                        {tasks.map(task => (
+                            <div key={task.id} className="bg-white p-4 mb-2 rounded shadow">
+                                <h3 className="font-bold">{task.title}</h3>
+                                <p>{task.description}</p>
+                                <p>Priority: {task.priority}</p>
+                                <p>Category: {task.category}</p>
+                                <p>Deadline: {task.deadline}</p>
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div 
+                                        className="bg-blue-600 h-2.5 rounded-full" 
+                                        style={{ width: `${(task.subtasks.filter(st => st.completed).length / task.subtasks.length) * 100 || 0}%` }}
+                                    ></div>
+                                </div>
+                                {task.subtasks.map(subtask => (
+                                    <div key={subtask.id} className="ml-4">
+                                        <input 
+                                            type="checkbox" 
+                                            checked={subtask.completed}
+                                            onChange={() => completeSubtask(task.id, subtask.id)}
+                                        />
+                                        <span>{subtask.title}</span>
+                                    </div>
+                                ))}
+                                <button 
+                                    className="mt-2 bg-green-500 text-white px-2 py-1 rounded"
+                                    onClick={() => completeTask(task.id)}
+                                    disabled={!task.subtasks.every(st => st.completed)}
+                                >
+                                    Complete Task
+                                </button>
+                                <button 
+                                    className="mt-2 ml-2 bg-blue-500 text-white px-2 py-1 rounded"
+                                    onClick={() => {
+                                        const title = prompt("Subtask title:");
+                                        if (title) addSubtask(task.id, title);
+                                    }}
+                                >
+                                    Add Subtask
+                                </button>
+                            </div>
+                        ))}
+                        <button 
+                            className="bg-blue-600 text-white px-4 py-2 rounded w-full mt-4"
+                            onClick={() => {
+                                const title = prompt("Task title:");
+                                const description = prompt("Description:");
+                                const priority = prompt("Priority (Low/Medium/High):");
+                                const category = prompt("Category:");
+                                const deadline = prompt("Deadline (e.g., YYYY-MM-DD):");
+                                if (title && priority && category && deadline) {
+                                    addTask(title, description, priority, category, deadline);
+                                }
+                            }}
+                        >
+                            Add Task
+                        </button>
+                    </div>
+
+                    {/* Pomodoro Timer */}
+                    <div className="bg-white p-4 border-t">
+                        <h3 className="font-bold">Pomodoro Timer</h3>
+                        <p>{Math.floor(pomodoro.time / 60)}:{(pomodoro.time % 60).toString().padStart(2, '0')} {pomodoro.isWork ? 'Work' : 'Break'}</p>
+                        <div className="flex space-x-2">
+                            <button 
+                                className="bg-green-500 text-white px-4 py-2 rounded"
+                                onClick={startPomodoro}
+                            >
+                                Start
+                            </button>
+                            <button 
+                                className="bg-yellow-500 text-white px-4 py-2 rounded"
+                                onClick={pausePomodoro}
+                            >
+                                Pause
+                            </button>
+                            <button 
+                                className="bg-red-500 text-white px-4 py-2 rounded"
+                                onClick={resetPomodoro}
+                            >
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Sidebar */}
+                    <div className={`fixed inset-0 bg-gray-800 bg-opacity-75 transform ${showSidebar ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 md:w-1/3 w-full`}>
+                        <div className="bg-white h-full p-4">
+                            <button 
+                                className="text-red-500 mb-4"
+                                onClick={() => setShowSidebar(false)}
+                            >
+                                Close
+                            </button>
+                            <h2 className="text-xl font-bold">Analytics</h2>
+                            <h3>Daily Report</h3>
+                            {analytics.daily.map((report, index) => (
+                                <div key={index}>
+                                    <p>Date: {report.date}</p>
+                                    <p>Tasks Completed: {report.tasksCompleted}</p>
+                                    <p>EXP Change: {report.expChange}</p>
+                                </div>
+                            ))}
+                            {/* Add weekly/monthly reports similarly */}
+                        </div>
+                    </div>
+
+                    <button 
+                        className="fixed bottom-4 right-4 bg-blue-600 text-white p-4 rounded-full"
+                        onClick={() => setShowSidebar(true)}
+                    >
+                        Analytics
+                    </button>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
 </body>
 </html>
