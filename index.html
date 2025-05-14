@@ -6,32 +6,32 @@
   <title>Productivity App</title>
   <script src="https://cdn.tailwindcss.com/3.4.1"></script>
 </head>
-<body class="bg-gray-100 font-sans antialiased">
+<body class="bg-gray-900 text-gray-200 font-sans antialiased">
   <div class="max-w-md mx-auto min-h-screen flex flex-col">
     <!-- Header: Level and EXP -->
-    <div class="bg-indigo-600 text-white p-4 sticky top-0 z-10 shadow-md">
-      <h1 class="text-xl font-semibold">Level <span id="level">0</span></h1>
+    <div class="bg-gray-800 text-gray-200 p-4 sticky top-0 z-10 shadow-md">
+      <h1 class="text-xl font-medium">Level <span id="level">0</span></h1>
       <div class="text-sm mt-1">EXP: <span id="exp">0</span>/<span id="exp-required">40</span></div>
-      <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-        <div id="exp-progress" class="bg-green-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+      <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+        <div id="exp-progress" class="bg-gray-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
       </div>
     </div>
 
     <!-- Notification -->
-    <div id="notification" class="hidden bg-red-500 text-white p-3 rounded-lg mx-4 mt-4 text-sm"></div>
+    <div id="notification" class="hidden bg-gray-700 text-gray-200 p-3 rounded-lg mx-4 mt-4 text-sm"></div>
 
     <!-- Task Section -->
     <div class="flex-1 p-4 space-y-4">
-      <div class="bg-white p-4 rounded-lg shadow-sm">
-        <input id="task-title" type="text" placeholder="Task Title" class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
-        <textarea id="task-desc" placeholder="Description" class="w-full p-2 border rounded-lg mt-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300"></textarea>
+      <div class="bg-gray-800 p-4 rounded-lg shadow-sm">
+        <input id="task-title" type="text" placeholder="Task Title" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        <textarea id="task-desc" placeholder="Description" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg mt-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"></textarea>
         <div class="flex gap-2 mt-2">
-          <select id="task-priority" class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <select id="task-priority" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
             <option value="High">High</option>
           </select>
-          <select id="task-category" class="w-full p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
+          <select id="task-category" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
             <option value="Mind">Mind</option>
             <option value="Brain">Brain</option>
             <option value="Health">Health</option>
@@ -39,27 +39,27 @@
             <option value="Relationships">Relationships</option>
           </select>
         </div>
-        <input id="task-deadline" type="date" class="w-full p-2 border rounded-lg mt-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
-        <button onclick="addTask()" class="w-full bg-indigo-600 text-white p-2 rounded-lg mt-2 hover:bg-indigo-700 transition text-sm">Add Task</button>
+        <input id="task-deadline" type="date" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg mt-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        <button onclick="addTask()" class="w-full bg-gray-600 text-gray-200 p-2 rounded-lg mt-2 hover:bg-gray-500 transition text-sm">Add Task</button>
       </div>
       <div id="task-list" class="space-y-4"></div>
     </div>
 
     <!-- Pomodoro Timer -->
-    <div class="bg-white p-4 shadow-t-md sticky bottom-0">
+    <div class="bg-gray-800 p-4 shadow-t-md sticky bottom-0">
       <h3 class="text-lg font-medium">Pomodoro: <span id="pomodoro-time">25:00</span></h3>
       <div class="text-sm">Session: <span id="pomodoro-session">Work</span> (<span id="pomodoro-count">0</span>/4)</div>
       <div class="flex gap-2 mt-2">
-        <button onclick="startPomodoro()" class="flex-1 bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition text-sm">Start</button>
-        <button onclick="resumePomodoro()" class="flex-1 bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition text-sm">Resume</button>
-        <button onclick="restartPomodoro()" class="flex-1 bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition text-sm">Restart</button>
+        <button onclick="startPomodoro()" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">Start</button>
+        <button onclick="resumePomodoro()" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">Resume</button>
+        <button onclick="restartPomodoro()" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">Restart</button>
       </div>
     </div>
 
     <!-- Sidebar: Analytics -->
-    <button class="fixed top-4 right-4 bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700 transition text-sm z-20" onclick="toggleSidebar()">Analytics</button>
-    <div id="sidebar" class="fixed top-0 right-[-100%] w-4/5 max-w-xs h-full bg-white shadow-lg p-4 transition-all duration-300 overflow-y-auto">
-      <h2 class="text-lg font-semibold mb-4">Analytics</h2>
+    <button class="fixed top-4 right-4 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm z-20" onclick="toggleSidebar()">Analytics</button>
+    <div id="sidebar" class="fixed top-0 right-[-100%] w-4/5 max-w-xs h-full bg-gray-800 shadow-lg p-4 transition-all duration-300 overflow-y-auto">
+      <h2 class="text-lg font-medium mb-4">Analytics</h2>
       <h3 class="text-md font-medium">Daily Report</h3>
       <p class="text-sm">Tasks Completed: <span id="daily-tasks">0</span></p>
       <p class="text-sm">EXP Change: <span id="daily-exp">0</span></p>
@@ -147,7 +147,8 @@
         category,
         deadline: deadline ? new Date(deadline).toISOString() : null,
         subtasks: [],
-        completed: false
+        completed: false,
+        completedOnce: false
       };
 
       user.tasks.push(task);
@@ -165,27 +166,27 @@
       taskList.innerHTML = '';
       user.tasks.forEach(task => {
         const taskItem = document.createElement('div');
-        taskItem.className = 'bg-white p-4 rounded-lg shadow-sm';
+        taskItem.className = 'bg-gray-800 p-4 rounded-lg shadow-sm';
         const completedSubtasks = task.subtasks.filter(s => s.completed).length;
         const progress = task.subtasks.length ? (completedSubtasks / task.subtasks.length) * 100 : 100;
         taskItem.innerHTML = `
           <div class="flex justify-between">
-            <h3 class="text-md font-medium">${task.title}</h3>
-            <span class="text-sm text-gray-500">${task.priority}</span>
+            <h3 class="text-md font-medium ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h3>
+            <span class="text-sm text-gray-400">${task.priority}</span>
           </div>
-          <p class="text-sm text-gray-600">${task.desc}</p>
-          <p class="text-sm text-gray-500">Category: ${task.category}</p>
-          <p class="text-sm text-gray-500">Deadline: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'None'}</p>
-          <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
-            <div class="bg-indigo-500 h-2 rounded-full" style="width: ${progress}%"></div>
-          </div>
-          <div class="flex gap-2 mt-2">
-            <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="flex-1 p-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300">
-            <button onclick="addSubtask(${task.id})" class="bg-indigo-600 text-white px-3 py-1 rounded-lg hover:bg-indigo-700 transition text-sm">Add</button>
+          <p class="text-sm text-gray-400">${task.desc}</p>
+          <p class="text-sm text-gray-400">Category: ${task.category}</p>
+          <p class="text-sm text-gray-400">Deadline: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'None'}</p>
+          <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
+            <div class="bg-gray-500 h-2 rounded-full" style="width: ${progress}%"></div>
           </div>
           <div class="flex gap-2 mt-2">
-            <button onclick="completeTask(${task.id})" class="flex-1 bg-green-500 text-white p-2 rounded-lg hover:bg-green-600 transition text-sm">${task.completed ? 'Undo' : 'Complete'}</button>
-            <button onclick="deleteTask(${task.id})" class="flex-1 bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition text-sm">Delete</button>
+            <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="flex-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <button onclick="addSubtask(${task.id})" class="bg-gray-600 text-gray-200 px-3 py-1 rounded-lg hover:bg-gray-500 transition text-sm">Add</button>
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button onclick="completeTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">${task.completed ? 'Undo' : 'Complete'}</button>
+            <button onclick="deleteTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">Delete</button>
           </div>
           <div id="subtasks-${task.id}" class="mt-2 space-y-2"></div>
         `;
@@ -200,7 +201,7 @@
       const title = input.value;
       if (!title) return alert('Subtask title is required');
       const task = user.tasks.find(t => t.id === taskId);
-      task.subtasks.push({ id: Date.now(), title, completed: false, lastTouched: new Date().toISOString() });
+      task.subtasks.push({ id: Date.now(), title, completed: false, lastTouched: new Date().toISOString(), completedOnce: false });
       input.value = '';
       saveState();
       updateUI();
@@ -215,9 +216,9 @@
         const subtaskItem = document.createElement('div');
         subtaskItem.className = 'flex items-center gap-2';
         subtaskItem.innerHTML = `
-          <input type="checkbox" ${subtask.completed ? 'checked' : ''} onchange="toggleSubtask(${taskId}, ${subtask.id})" class="h-4 w-4 text-indigo-600 focus:ring-indigo-300">
-          <span class="text-sm ${subtask.completed ? 'line-through text-gray-500' : ''}">${subtask.title}</span>
-          <button onclick="deleteSubtask(${taskId}, ${subtask.id})" class="ml-auto text-red-500 hover:text-red-600 text-sm">Delete</button>
+          <input type="checkbox" ${subtask.completed ? 'checked' : ''} onchange="toggleSubtask(${taskId}, ${subtask.id})" class="h-4 w-4 text-gray-500 focus:ring-gray-500">
+          <span class="text-sm ${subtask.completed ? 'line-through text-gray-500' : 'text-gray-200'}">${subtask.title}</span>
+          <button onclick="deleteSubtask(${taskId}, ${subtask.id})" class="ml-auto text-gray-400 hover:text-gray-300 text-sm">Delete</button>
         `;
         subtaskList.appendChild(subtaskItem);
       });
@@ -229,17 +230,25 @@
       const subtask = task.subtasks.find(s => s.id === subtaskId);
       subtask.completed = !subtask.completed;
       subtask.lastTouched = new Date().toISOString();
-      task.completed = task.subtasks.every(s => s.completed);
-      if (task.completed) {
-        user.exp += 10;
-        user.dailyTasks += 1;
-        user.weeklyTasks += 1;
-        user.monthlyTasks += 1;
-        user.dailyExp += 10;
-        user.weeklyExp += 10;
-        user.monthlyExp += 10;
-        checkLevelUp();
-        updateStreaks(task.category);
+      if (subtask.completed && !subtask.completedOnce) {
+        subtask.completedOnce = true;
+        if (task.subtasks.every(s => s.completed)) {
+          task.completed = true;
+          if (!task.completedOnce) {
+            task.completedOnce = true;
+            user.exp += 10;
+            user.dailyTasks += 1;
+            user.weeklyTasks += 1;
+            user.monthlyTasks += 1;
+            user.dailyExp += 10;
+            user.weeklyExp += 10;
+            user.monthlyExp += 10;
+            checkLevelUp();
+            updateStreaks(task.category);
+          }
+        }
+      } else if (!subtask.completed) {
+        task.completed = false;
       }
       saveState();
       updateUI();
@@ -258,8 +267,14 @@
     function completeTask(taskId) {
       const task = user.tasks.find(t => t.id === taskId);
       task.completed = !task.completed;
-      task.subtasks.forEach(s => s.completed = task.completed);
-      if (task.completed) {
+      task.subtasks.forEach(s => {
+        s.completed = task.completed;
+        if (task.completed && !s.completedOnce) {
+          s.completedOnce = true;
+        }
+      });
+      if (task.completed && !task.completedOnce) {
+        task.completedOnce = true;
         user.exp += 10;
         user.dailyTasks += 1;
         user.weeklyTasks += 1;
@@ -269,6 +284,8 @@
         user.monthlyExp += 10;
         checkLevelUp();
         updateStreaks(task.category);
+      } else if (!task.completed) {
+        task.completedOnce = false;
       }
       saveState();
       updateUI();
