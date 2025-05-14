@@ -9,20 +9,23 @@
 <body class="bg-gray-900 text-gray-200 font-sans antialiased">
   <div class="max-w-md mx-auto min-h-screen flex flex-col">
     <!-- Header: Level and EXP -->
-    <div class="bg-gray-800 text-gray-200 p-4 sticky top-0 z-10 shadow-md">
-      <h1 class="text-xl font-medium">Level <span id="level">0</span></h1>
+    <div class="bg-gray-800 text-gray-200 p-3 sticky top-0 z-10 shadow-md">
+      <h1 class="text-lg font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        Level <span id="level">0</span>
+      </h1>
       <div class="text-sm mt-1">EXP: <span id="exp">0</span>/<span id="exp-required">40</span></div>
       <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
-        <div id="exp-progress" class="bg-gray-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+        <div id="exp-progress" class="bg-gray-500 h-2 rounded-full transition-all duration-200" style="width: 0%"></div>
       </div>
     </div>
 
     <!-- Notification -->
-    <div id="notification" class="hidden bg-gray-700 text-gray-200 p-3 rounded-lg mx-4 mt-4 text-sm"></div>
+    <div id="notification" class="hidden bg-gray-700 text-gray-200 p-3 rounded-lg mx-3 mt-3 text-sm"></div>
 
     <!-- Task Section -->
-    <div class="flex-1 p-4 space-y-4">
-      <div class="bg-gray-800 p-4 rounded-lg shadow-sm">
+    <div class="flex-1 p-3 space-y-3">
+      <div class="bg-gray-800 p-3 rounded-lg shadow-sm">
         <input id="task-title" type="text" placeholder="Task Title" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
         <textarea id="task-desc" placeholder="Description" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg mt-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"></textarea>
         <div class="flex gap-2 mt-2">
@@ -39,15 +42,30 @@
             <option value="Relationships">Relationships</option>
           </select>
         </div>
-        <input id="task-deadline" type="date" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg mt-2 text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-        <button onclick="addTask()" class="w-full bg-gray-600 text-gray-200 p-2 rounded-lg mt-2 hover:bg-gray-500 transition text-sm">Add Task</button>
+        <div class="flex gap-2 mt-2">
+          <input id="task-deadline" type="date" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          <select id="task-recurrence" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <option value="None">None</option>
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+            <option value="Yearly">Yearly</option>
+          </select>
+        </div>
+        <button onclick="addTask()" class="w-full bg-gray-600 text-gray-200 p-2 rounded-lg mt-2 hover:bg-gray-500 transition text-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+          Add Task
+        </button>
       </div>
-      <div id="task-list" class="space-y-4"></div>
+      <div id="task-list" class="space-y-3"></div>
     </div>
 
     <!-- Pomodoro Timer -->
-    <div class="bg-gray-800 p-4 shadow-t-md sticky bottom-0">
-      <h3 class="text-lg font-medium">Pomodoro: <span id="pomodoro-time">25:00</span></h3>
+    <div class="bg-gray-800 p-3 shadow-t-md sticky bottom-0">
+      <h3 class="text-md font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        Pomodoro: <span id="pomodoro-time">25:00</span>
+      </h3>
       <div class="text-sm">Session: <span id="pomodoro-session">Work</span> (<span id="pomodoro-count">0</span>/4)</div>
       <div class="flex gap-2 mt-2">
         <button onclick="startPomodoro()" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">Start</button>
@@ -56,21 +74,58 @@
       </div>
     </div>
 
-    <!-- Sidebar: Analytics -->
-    <button class="fixed top-4 right-4 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm z-20" onclick="toggleSidebar()">Analytics</button>
-    <div id="sidebar" class="fixed top-0 right-[-100%] w-4/5 max-w-xs h-full bg-gray-800 shadow-lg p-4 transition-all duration-300 overflow-y-auto">
-      <h2 class="text-lg font-medium mb-4">Analytics</h2>
-      <h3 class="text-md font-medium">Daily Report</h3>
-      <p class="text-sm">Tasks Completed: <span id="daily-tasks">0</span></p>
-      <p class="text-sm">EXP Change: <span id="daily-exp">0</span></p>
-      <p class="text-sm">Pomodoro Sessions: <span id="daily-pomodoro">0</span></p>
-      <h3 class="text-md font-medium mt-4">Weekly Report</h3>
-      <p class="text-sm">Tasks Completed: <span id="weekly-tasks">0</span></p>
-      <p class="text-sm">EXP Earned: <span id="weekly-exp">0</span></p>
-      <p class="text-sm">Streak: <span id="weekly-streak">0</span> days</p>
-      <h3 class="text-md font-medium mt-4">Monthly Report</h3>
-      <p class="text-sm">Tasks Completed: <span id="monthly-tasks">0</span></p>
-      <p class="text-sm">EXP Earned: <span id="monthly-exp">0</span></p>
+    <!-- Sidebar: Analytics & History -->
+    <button class="fixed top-3 right-3 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm z-20 flex items-center gap-2" onclick="toggleSidebar()">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+      Menu
+    </button>
+    <div id="sidebar" class="fixed top-0 right-[-100%] w-4/5 max-w-xs h-full bg-gray-800 shadow-lg p-3 transition-all duration-300 overflow-y-auto">
+      <div class="flex gap-2 mb-4">
+        <button onclick="showAnalytics()" class="flex-1 bg-gray-700 text-gray-200 p-2 rounded-lg text-sm hover:bg-gray-600">Analytics</button>
+        <button onclick="showHistory()" class="flex-1 bg-gray-700 text-gray-200 p-2 rounded-lg text-sm hover:bg-gray-600">History</button>
+      </div>
+      <div id="analytics-section">
+        <h2 class="text-lg font-medium mb-3">Analytics</h2>
+        <h3 class="text-sm font-medium">Settings</h3>
+        <div class="space-y-2 mb-4">
+          <div>
+            <label class="text-sm">Work (min)</label>
+            <input id="pomodoro-work" type="number" min="1" value="25" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          </div>
+          <div>
+            <label class="text-sm">Short Break (min)</label>
+            <input id="pomodoro-short-break" type="number" min="1" value="5" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          </div>
+          <div>
+            <label class="text-sm">Long Break (min)</label>
+            <input id="pomodoro-long-break" type="number" min="1" value="15" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+          </div>
+          <button onclick="saveSettings()" class="w-full bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            Save Settings
+          </button>
+        </div>
+        <h3 class="text-sm font-medium">Daily Report</h3>
+        <p class="text-sm">Tasks Completed: <span id="daily-tasks">0</span></p>
+        <p class="text-sm">EXP Change: <span id="daily-exp">0</span></p>
+        <p class="text-sm">Pomodoro Sessions: <span id="daily-pomodoro">0</span></p>
+        <h3 class="text-sm font-medium mt-3">Weekly Report</h3>
+        <p class="text-sm">Tasks Completed: <span id="weekly-tasks">0</span></p>
+        <p class="text-sm">EXP Earned: <span id="weekly-exp">0</span></p>
+        <p class="text-sm">Streak: <span id="weekly-streak">0</span> days</p>
+        <h3 class="text-sm font-medium mt-3">Monthly Report</h3>
+        <p class="text-sm">Tasks Completed: <span id="monthly-tasks">0</span></p>
+        <p class="text-sm">EXP Earned: <span id="monthly-exp">0</span></p>
+      </div>
+      <div id="history-section" class="hidden">
+        <h2 class="text-lg font-medium mb-3">History</h2>
+        <input id="history-date" type="date" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        <button onclick="loadHistory()" class="w-full bg-gray-600 text-gray-200 p-2 rounded-lg mt-2 hover:bg-gray-500 transition text-sm flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          Load Week
+        </button>
+        <div id="history-tasks" class="mt-3 space-y-2"></div>
+      </div>
     </div>
   </div>
 
@@ -81,9 +136,11 @@
       exp: 0,
       expRequired: 40,
       tasks: [],
+      history: [],
       pomodoroCount: 0,
       pomodoroSession: 'Work',
       pomodoroTime: 25 * 60,
+      settings: { work: 25, shortBreak: 5, longBreak: 15 },
       dailyTasks: 0,
       dailyExp: 0,
       dailyPomodoro: 0,
@@ -103,6 +160,11 @@
       const saved = localStorage.getItem('productivityApp');
       if (saved) {
         user = JSON.parse(saved);
+        // Ensure settings exist, apply defaults if missing
+        user.settings = user.settings || { work: 25, shortBreak: 5, longBreak: 15 };
+        document.getElementById('pomodoro-work').value = user.settings.work;
+        document.getElementById('pomodoro-short-break').value = user.settings.shortBreak;
+        document.getElementById('pomodoro-long-break').value = user.settings.longBreak;
         updateUI();
         checkDailyPenalties();
       }
@@ -111,6 +173,19 @@
     // Save to localStorage
     function saveState() {
       localStorage.setItem('productivityApp', JSON.stringify(user));
+    }
+
+    // Save Settings
+    function saveSettings() {
+      user.settings.work = parseInt(document.getElementById('pomodoro-work').value) || 25;
+      user.settings.shortBreak = parseInt(document.getElementById('pomodoro-short-break').value) || 5;
+      user.settings.longBreak = parseInt(document.getElementById('pomodoro-long-break').value) || 15;
+      user.pomodoroTime = user.settings.work * 60;
+      user.pomodoroSession = 'Work';
+      user.pomodoroCount = 0;
+      updatePomodoroUI();
+      saveState();
+      showNotification('Settings saved');
     }
 
     // Calculate EXP needed for next level
@@ -136,6 +211,7 @@
       const priority = document.getElementById('task-priority').value;
       const category = document.getElementById('task-category').value;
       const deadline = document.getElementById('task-deadline').value;
+      const recurrence = document.getElementById('task-recurrence').value;
 
       if (!title) return alert('Task title is required');
 
@@ -146,18 +222,22 @@
         priority,
         category,
         deadline: deadline ? new Date(deadline).toISOString() : null,
+        recurrence,
         subtasks: [],
         completed: false,
-        completedOnce: false
+        completedOnce: false,
+        createdDate: new Date().toISOString()
       };
 
       user.tasks.push(task);
+      user.history.push({ ...task, historyId: Date.now() });
       if (!user.streakTasks[category]) user.streakTasks[category] = { days: 0, lastDate: null };
       saveState();
       updateUI();
       document.getElementById('task-title').value = '';
       document.getElementById('task-desc').value = '';
       document.getElementById('task-deadline').value = '';
+      document.getElementById('task-recurrence').value = 'None';
     }
 
     // Render Tasks
@@ -166,27 +246,42 @@
       taskList.innerHTML = '';
       user.tasks.forEach(task => {
         const taskItem = document.createElement('div');
-        taskItem.className = 'bg-gray-800 p-4 rounded-lg shadow-sm';
+        taskItem.className = 'bg-gray-800 p-3 rounded-lg shadow-sm';
         const completedSubtasks = task.subtasks.filter(s => s.completed).length;
-        const progress = task.subtasks.length ? (completedSubtasks / task.subtasks.length) * 100 : 100;
+        const subtaskProgress = task.subtasks.length ? (completedSubtasks / task.subtasks.length) * 100 : 100;
+        const streakProgress = user.streakTasks[task.category] ? (user.streakTasks[task.category].days / 7) * 100 : 0;
         taskItem.innerHTML = `
           <div class="flex justify-between">
-            <h3 class="text-md font-medium ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h3>
-            <span class="text-sm text-gray-400">${task.priority}</span>
+            <h3 class="text-sm font-medium ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h3>
+            <span class="text-xs text-gray-400">${task.priority}</span>
           </div>
-          <p class="text-sm text-gray-400">${task.desc}</p>
-          <p class="text-sm text-gray-400">Category: ${task.category}</p>
-          <p class="text-sm text-gray-400">Deadline: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'None'}</p>
+          <p class="text-xs text-gray-400">${task.desc}</p>
+          <p class="text-xs text-gray-400">Category: ${task.category}</p>
+          <p class="text-xs text-gray-400">Deadline: ${task.deadline ? new Date(task.deadline).toLocaleDateString() : 'None'}</p>
+          <p class="text-xs text-gray-400">Recurrence: ${task.recurrence}</p>
           <div class="w-full bg-gray-700 rounded-full h-2 mt-2">
-            <div class="bg-gray-500 h-2 rounded-full" style="width: ${progress}%"></div>
+            <div class="bg-gray-500 h-2 rounded-full" style="width: ${subtaskProgress}%"></div>
+          </div>
+          <p class="text-xs text-gray-400 mt-1">Streak: ${user.streakTasks[task.category]?.days || 0}/7 days</p>
+          <div class="w-full bg-gray-700 rounded-full h-2 mt-1">
+            <div class="bg-gray-500 h-2 rounded-full" style="width: ${streakProgress}%"></div>
           </div>
           <div class="flex gap-2 mt-2">
-            <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="flex-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
-            <button onclick="addSubtask(${task.id})" class="bg-gray-600 text-gray-200 px-3 py-1 rounded-lg hover:bg-gray-500 transition text-sm">Add</button>
+            <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="flex-1 p-2 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500">
+            <button onclick="addSubtask(${task.id})" class="bg-gray-600 text-gray-200 px-3 py-1 rounded-lg hover:bg-gray-500 transition text-xs flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Add
+            </button>
           </div>
           <div class="flex gap-2 mt-2">
-            <button onclick="completeTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">${task.completed ? 'Undo' : 'Complete'}</button>
-            <button onclick="deleteTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-sm">Delete</button>
+            <button onclick="completeTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-xs flex items-center justify-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+              ${task.completed ? 'Undo' : 'Complete'}
+            </button>
+            <button onclick="deleteTask(${task.id})" class="flex-1 bg-gray-600 text-gray-200 p-2 rounded-lg hover:bg-gray-500 transition text-xs flex items-center justify-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Delete
+            </button>
           </div>
           <div id="subtasks-${task.id}" class="mt-2 space-y-2"></div>
         `;
@@ -217,8 +312,11 @@
         subtaskItem.className = 'flex items-center gap-2';
         subtaskItem.innerHTML = `
           <input type="checkbox" ${subtask.completed ? 'checked' : ''} onchange="toggleSubtask(${taskId}, ${subtask.id})" class="h-4 w-4 text-gray-500 focus:ring-gray-500">
-          <span class="text-sm ${subtask.completed ? 'line-through text-gray-500' : 'text-gray-200'}">${subtask.title}</span>
-          <button onclick="deleteSubtask(${taskId}, ${subtask.id})" class="ml-auto text-gray-400 hover:text-gray-300 text-sm">Delete</button>
+          <span class="text-xs ${subtask.completed ? 'line-through text-gray-500' : 'text-gray-200'}">${subtask.title}</span>
+          <button onclick="deleteSubtask(${taskId}, ${subtask.id})" class="ml-auto text-gray-400 hover:text-gray-300 text-xs flex items-center gap-1">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            Delete
+          </button>
         `;
         subtaskList.appendChild(subtaskItem);
       });
@@ -236,6 +334,8 @@
           task.completed = true;
           if (!task.completedOnce) {
             task.completedOnce = true;
+            task.completedDate = new Date().toISOString();
+            user.history.find(h => h.historyId === task.id).completedDate = task.completedDate;
             user.exp += 10;
             user.dailyTasks += 1;
             user.weeklyTasks += 1;
@@ -245,10 +345,14 @@
             user.monthlyExp += 10;
             checkLevelUp();
             updateStreaks(task.category);
+            handleRecurrence(task);
           }
         }
       } else if (!subtask.completed) {
         task.completed = false;
+        task.completedOnce = false;
+        task.completedDate = null;
+        user.history.find(h => h.historyId === task.id).completedDate = null;
       }
       saveState();
       updateUI();
@@ -275,6 +379,8 @@
       });
       if (task.completed && !task.completedOnce) {
         task.completedOnce = true;
+        task.completedDate = new Date().toISOString();
+        user.history.find(h => h.historyId === task.id).completedDate = task.completedDate;
         user.exp += 10;
         user.dailyTasks += 1;
         user.weeklyTasks += 1;
@@ -284,11 +390,33 @@
         user.monthlyExp += 10;
         checkLevelUp();
         updateStreaks(task.category);
+        handleRecurrence(task);
       } else if (!task.completed) {
         task.completedOnce = false;
+        task.completedDate = null;
+        user.history.find(h => h.historyId === task.id).completedDate = null;
       }
       saveState();
       updateUI();
+    }
+
+    // Handle Recurrence
+    function handleRecurrence(task) {
+      if (task.recurrence === 'None') return;
+      const newTask = { ...task, id: Date.now(), historyId: Date.now(), completed: false, completedOnce: false, completedDate: null, subtasks: task.subtasks.map(s => ({ ...s, id: Date.now(), completed: false, completedOnce: false, lastTouched: new Date().toISOString() })) };
+      const now = new Date();
+      if (task.recurrence === 'Daily') {
+        newTask.deadline = new Date(now.setDate(now.getDate() + 1)).toISOString();
+      } else if (task.recurrence === 'Weekly') {
+        newTask.deadline = new Date(now.setDate(now.getDate() + 7)).toISOString();
+      } else if (task.recurrence === 'Monthly') {
+        newTask.deadline = new Date(now.setMonth(now.getMonth() + 1)).toISOString();
+      } else if (task.recurrence === 'Yearly') {
+        newTask.deadline = new Date(now.setFullYear(now.getFullYear() + 1)).toISOString();
+      }
+      newTask.createdDate = new Date().toISOString();
+      user.tasks.push(newTask);
+      user.history.push({ ...newTask });
     }
 
     // Delete Task
@@ -311,11 +439,14 @@
     function updateStreaks(category) {
       const today = new Date().toDateString();
       if (user.streakTasks[category].lastDate !== today) {
-        user.streakTasks[category].days += 1;
+        user.streakTasks[category].days = Math.min(user.streakTasks[category].days + 1, 7);
         user.streakTasks[category].lastDate = today;
         user.weeklyStreak = Math.max(user.weeklyStreak, user.streakTasks[category].days);
         if (user.streakTasks[category].days >= 5) {
           showNotification('You’ve earned a break day for your ' + category + ' streak!');
+        }
+        if (user.streakTasks[category].days === 7) {
+          user.streakTasks[category].days = 0;
         }
       }
     }
@@ -335,11 +466,11 @@
             user.dailyPomodoro += 1;
             user.pomodoroCount += 1;
             user.pomodoroSession = user.pomodoroCount % 4 === 0 ? 'Long Break' : 'Break';
-            user.pomodoroTime = user.pomodoroSession === 'Long Break' ? 15 * 60 : 5 * 60;
+            user.pomodoroTime = user.pomodoroSession === 'Long Break' ? user.settings.longBreak * 60 : user.settings.shortBreak * 60;
             if (user.pomodoroCount % 4 === 0) user.pomodoroCount = 0;
           } else {
             user.pomodoroSession = 'Work';
-            user.pomodoroTime = 25 * 60;
+            user.pomodoroTime = user.settings.work * 60;
           }
         }
         updatePomodoroUI();
@@ -354,7 +485,7 @@
     function restartPomodoro() {
       clearInterval(pomodoroInterval);
       pomodoroInterval = null;
-      user.pomodoroTime = 25 * 60;
+      user.pomodoroTime = user.settings.work * 60;
       user.pomodoroSession = 'Work';
       user.pomodoroCount = 0;
       user.exp -= 1;
@@ -389,6 +520,45 @@
       const sidebar = document.getElementById('sidebar');
       sidebar.classList.toggle('right-[-100%]');
       sidebar.classList.toggle('right-0');
+    }
+
+    // Show Analytics
+    function showAnalytics() {
+      document.getElementById('analytics-section').classList.remove('hidden');
+      document.getElementById('history-section').classList.add('hidden');
+    }
+
+    // Show History
+    function showHistory() {
+      document.getElementById('analytics-section').classList.add('hidden');
+      document.getElementById('history-section').classList.remove('hidden');
+      loadHistory();
+    }
+
+    // Load History
+    function loadHistory() {
+      const dateInput = document.getElementById('history-date').value;
+      const historyTasks = document.getElementById('history-tasks');
+      historyTasks.innerHTML = '';
+      if (!dateInput) return;
+      const selectedDate = new Date(dateInput);
+      const startOfWeek = new Date(selectedDate.setDate(selectedDate.getDate() - selectedDate.getDay()));
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6);
+      const filteredTasks = user.history.filter(task => {
+        const created = new Date(task.createdDate);
+        return created >= startOfWeek && created <= endOfWeek;
+      });
+      filteredTasks.forEach(task => {
+        const taskItem = document.createElement('div');
+        taskItem.className = 'bg-gray-700 p-2 rounded-lg text-xs';
+        taskItem.innerHTML = `
+          <p class="${task.completedDate ? 'line-through text-gray-500' : ''}">${task.title} (${task.category})</p>
+          <p class="text-gray-400">Created: ${new Date(task.createdDate).toLocaleDateString()}</p>
+          ${task.completedDate ? `<p class="text-gray-400">Completed: ${new Date(task.completedDate).toLocaleDateString()}</p>` : ''}
+        `;
+        historyTasks.appendChild(taskItem);
+      });
     }
 
     // Notifications
