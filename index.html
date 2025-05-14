@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -48,6 +9,11 @@
   <style>
     body {
       font-family: 'Inter', sans-serif;
+    }
+    #pomodoro-section {
+      position: sticky;
+      bottom: 0;
+      z-index: 10;
     }
   </style>
 </head>
@@ -75,9 +41,9 @@
         <textarea id="task-desc" placeholder="Description" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg mt-1 text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
         <div class="flex gap-1 mt-1">
           <select id="task-priority" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="Low">Low</option>
-            <option value="Medium">Medium</option>
             <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
           </select>
           <select id="task-category" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="Mind">Mind</option>
@@ -97,10 +63,6 @@
             <option value="Yearly">Yearly</option>
           </select>
         </div>
-        <div class="mt-1">
-          <label class="text-xs">Streak Days</label>
-          <input id="task-streak-days" type="number" min="1" value="7" class="w-full p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-        </div>
         <button onclick="addTask()" class="w-full bg-gray-600 text-gray-200 p-1.5 rounded-lg mt-1 hover:bg-gray-500 transition text-xs flex items-center justify-center gap-1.5">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           Add Task
@@ -109,8 +71,24 @@
       <div id="task-list" class="grid gap-2"></div>
     </div>
 
+    <!-- Add Note Button -->
+    <button id="add-note-btn" class="fixed bottom-16 right-4 bg-blue-500 text-white p-3 rounded-full shadow-lg hover:bg-blue-600 transition z-20" onclick="openNotePopup()">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+    </button>
+
+    <!-- Note Popup -->
+    <div id="note-popup" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+      <div class="bg-gray-800 p-4 rounded-lg w-11/12 max-w-sm">
+        <h2 class="text-sm font-medium mb-2">Add Note</h2>
+        <textarea id="note-content" class="w-full p-2 bg-gray-700 border border-gray-600 rounded-lg text-xs text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" rows="5"></textarea>
+        <div class="flex gap-2 mt-2">
+          <button onclick="saveAndCloseNote()" class="flex-1 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-xs">Save & Close</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Pomodoro Timer -->
-    <div class="bg-gray-800 p-2 shadow-t-md sticky bottom-0">
+    <div id="pomodoro-section" class="bg-gray-800 p-2 shadow-t-md">
       <h3 class="text-sm font-medium flex items-center gap-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
         Pomodoro: <span id="pomodoro-time">25:00</span>
@@ -123,7 +101,7 @@
       </div>
     </div>
 
-    <!-- Sidebar: Analytics & History -->
+    <!-- Sidebar: Analytics, History & Notes -->
     <button class="fixed top-2 right-2 bg-gray-600 text-gray-200 p-1.5 rounded-lg hover:bg-gray-500 transition text-xs z-20 flex items-center gap-1.5" onclick="toggleSidebar()">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 012-2h2a2 2 0 012 2v12a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
       Menu
@@ -132,6 +110,7 @@
       <div class="flex gap-1 mb-2">
         <button onclick="showAnalytics()" class="flex-1 bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600">Analytics</button>
         <button onclick="showHistory()" class="flex-1 bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600">History</button>
+        <button onclick="showNotes()" class="flex-1 bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600">Notes</button>
       </div>
       <div class="mb-2">
         <button onclick="toggleTasksPerRow()" class="w-full bg-gray-700 text-gray-200 p-1.5 rounded-lg text-xs hover:bg-gray-600 flex items-center justify-center gap-1.5">
@@ -187,6 +166,10 @@
         </button>
         <div id="history-tasks" class="mt-2 space-y-1"></div>
       </div>
+      <div id="notes-section" class="hidden">
+        <h2 class="text-base font-semibold mb-2">Notes</h2>
+        <div id="notes-list" class="space-y-2"></div>
+      </div>
     </div>
   </div>
 
@@ -198,6 +181,7 @@
       expRequired: 40,
       tasks: [],
       history: [],
+      notes: [],
       pomodoroCount: 0,
       pomodoroSession: 'Work',
       pomodoroTime: 25 * 60,
@@ -211,7 +195,6 @@
       monthlyTasks: 0,
       monthlyExp: 0,
       lastActivityDate: null,
-      streakTasks: {},
       lastPomodoroDate: null,
       stagnationDays: 0,
       tasksPerRow: 2
@@ -223,14 +206,13 @@
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          // Ensure all properties are present
           user = {
             ...user,
             ...parsed,
             settings: parsed.settings || { work: 25, shortBreak: 5, longBreak: 15 },
             history: parsed.history || [],
             tasks: parsed.tasks || [],
-            streakTasks: parsed.streakTasks || {},
+            notes: parsed.notes || [],
             tasksPerRow: parsed.tasksPerRow || 2
           };
           document.getElementById('pomodoro-work').value = user.settings.work;
@@ -239,14 +221,13 @@
           document.getElementById('tasks-per-row-text').textContent = user.tasksPerRow === 1 ? '1 Task/Row' : '2 Tasks/Row';
           updateUI();
           checkDailyPenalties();
-          // Load last 7 days history by default
           showHistory();
         } catch (e) {
           console.error('Failed to parse localStorage:', e);
-          saveState(); // Save default state to prevent data loss
+          saveState();
         }
       } else {
-        saveState(); // Initialize localStorage with default state
+        saveState();
       }
     }
 
@@ -283,6 +264,7 @@
           expRequired: 40,
           tasks: [],
           history: [],
+          notes: [],
           pomodoroCount: 0,
           pomodoroSession: 'Work',
           pomodoroTime: 25 * 60,
@@ -296,7 +278,6 @@
           monthlyTasks: 0,
           monthlyExp: 0,
           lastActivityDate: null,
-          streakTasks: {},
           lastPomodoroDate: null,
           stagnationDays: 0,
           tasksPerRow: 2
@@ -339,7 +320,6 @@
       const category = document.getElementById('task-category').value;
       const deadline = document.getElementById('task-deadline').value;
       const recurrence = document.getElementById('task-recurrence').value;
-      const streakDays = parseInt(document.getElementById('task-streak-days').value) || 7;
 
       if (!title) return alert('Task title is required');
 
@@ -351,9 +331,6 @@
         category,
         deadline: deadline ? new Date(deadline).toISOString() : null,
         recurrence,
-        streakDays: Math.max(1, streakDays),
-        streakCurrent: 0,
-        streakLastDate: null,
         subtasks: [],
         completed: false,
         completedOnce: false,
@@ -368,7 +345,6 @@
       document.getElementById('task-desc').value = '';
       document.getElementById('task-deadline').value = '';
       document.getElementById('task-recurrence').value = 'None';
-      document.getElementById('task-streak-days').value = '7';
     }
 
     // Render Tasks
@@ -376,14 +352,17 @@
       const taskList = document.getElementById('task-list');
       taskList.className = `grid gap-2 grid-cols-${user.tasksPerRow}`;
       taskList.innerHTML = '';
-      // Sort tasks: incomplete first, completed last
-      const sortedTasks = user.tasks.sort((a, b) => a.completed - b.completed);
+      // Sort tasks: incomplete first, then by priority (High > Medium > Low)
+      const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+      const sortedTasks = user.tasks.sort((a, b) => {
+        if (a.completed !== b.completed) return a.completed - b.completed;
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      });
       sortedTasks.forEach(task => {
         const taskItem = document.createElement('div');
         taskItem.className = 'bg-gray-800 p-2 rounded-lg shadow-sm';
         const completedSubtasks = task.subtasks.filter(s => s.completed).length;
         const subtaskProgress = task.subtasks.length ? (completedSubtasks / task.subtasks.length) * 100 : 100;
-        const streakProgress = task.streakDays ? (task.streakCurrent / task.streakDays) * 100 : 0;
         taskItem.innerHTML = `
           <div class="flex justify-between">
             <h3 class="text-xs font-medium ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h3>
@@ -396,13 +375,9 @@
           <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1">
             <div class="bg-blue-500 h-1.5 rounded-full" style="width: ${subtaskProgress}%"></div>
           </div>
-          <p class="text-[0.65rem] text-gray-400 mt-1">Streak: ${task.streakCurrent}/${task.streakDays} days</p>
-          <div class="w-full bg-gray-600 rounded-full h-1.5 mt-1">
-            <div class="bg-blue-500 h-1.5 rounded-full" style="width: ${streakProgress}%"></div>
-          </div>
           <div class="flex gap-1 mt-1">
-            <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="flex-1 p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-[0.65rem] text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <button onclick="addSubtask(${task.id})" class="bg-gray-600 text-gray-200 px-2 py-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center gap-1">
+            <input id="subtask-${task.id}" type="text" placeholder="Add Subtask" class="w-3/4 p-1.5 bg-gray-700 border border-gray-600 rounded-lg text-[0.65rem] text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button onclick="addSubtask(${task.id})" class="w-1/4 bg-gray-600 text-gray-200 p-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
               Add
             </button>
@@ -478,7 +453,6 @@
             user.weeklyExp += 10;
             user.monthlyExp += 10;
             checkLevelUp();
-            updateTaskStreak(task);
             handleRecurrence(task);
           }
         }
@@ -523,7 +497,6 @@
         user.weeklyExp += 10;
         user.monthlyExp += 10;
         checkLevelUp();
-        updateTaskStreak(task);
         handleRecurrence(task);
       } else if (!task.completed) {
         task.completedOnce = false;
@@ -534,27 +507,18 @@
       updateUI();
     }
 
-    // Update Task Streak
-    function updateTaskStreak(task) {
-      const today = new Date().toDateString();
-      if (task.streakLastDate !== today) {
-        task.streakCurrent = Math.min(task.streakCurrent + 1, task.streakDays);
-        task.streakLastDate = today;
-        user.weeklyStreak = Math.max(user.weeklyStreak, task.streakCurrent);
-        if (task.streakCurrent >= Math.floor(task.streakDays * 0.7)) {
-          showNotification('You’ve earned a break day for your ' + task.title + ' streak!', true);
-        }
-        if (task.streakCurrent === task.streakDays) {
-          task.streakCurrent = 0;
-        }
-      }
-      saveState();
-    }
-
     // Handle Recurrence
     function handleRecurrence(task) {
       if (task.recurrence === 'None') return;
-      const newTask = { ...task, id: Date.now(), historyId: Date.now(), completed: false, completedOnce: false, completedDate: null, streakCurrent: 0, streakLastDate: null, subtasks: task.subtasks.map(s => ({ ...s, id: Date.now(), completed: false, completedOnce: false, lastTouched: new Date().toISOString() })) };
+      const newTask = {
+        ...task,
+        id: Date.now(),
+        historyId: Date.now(),
+        completed: false,
+        completedOnce: false,
+        completedDate: null,
+        subtasks: task.subtasks.map(s => ({ ...s, id: Date.now(), completed: false, completedOnce: false, lastTouched: new Date().toISOString() }))
+      };
       const now = new Date();
       if (task.recurrence === 'Daily') {
         newTask.deadline = new Date(now.setDate(now.getDate() + 1)).toISOString();
@@ -586,6 +550,78 @@
         user.expRequired = getExpRequired(user.level);
       }
       saveState();
+    }
+
+    // Note Functions
+    let currentNoteId = null;
+    function openNotePopup(noteId = null) {
+      currentNoteId = noteId;
+      const popup = document.getElementById('note-popup');
+      const content = document.getElementById('note-content');
+      if (noteId) {
+        const note = user.notes.find(n => n.id === noteId);
+        content.value = note.content;
+      } else {
+        content.value = '';
+      }
+      popup.classList.remove('hidden');
+    }
+
+    function saveAndCloseNote() {
+      const content = document.getElementById('note-content').value;
+      if (content.trim()) {
+        if (currentNoteId) {
+          const note = user.notes.find(n => n.id === currentNoteId);
+          note.content = content;
+          note.timestamp = new Date().toISOString();
+        } else {
+          user.notes.push({
+            id: Date.now(),
+            content,
+            timestamp: new Date().toISOString()
+          });
+          user.exp += 2;
+          user.dailyExp += 2;
+          user.weeklyExp += 2;
+          user.monthlyExp += 2;
+          checkLevelUp();
+          showNotification('Note added. +2 EXP', true);
+        }
+        saveState();
+      }
+      document.getElementById('note-popup').classList.add('hidden');
+      currentNoteId = null;
+      renderNotes();
+    }
+
+    function deleteNote(noteId) {
+      user.notes = user.notes.filter(n => n.id !== noteId);
+      saveState();
+      renderNotes();
+    }
+
+    function renderNotes() {
+      const notesList = document.getElementById('notes-list');
+      notesList.innerHTML = '';
+      user.notes.forEach(note => {
+        const noteItem = document.createElement('div');
+        noteItem.className = 'bg-gray-700 p-2 rounded-lg text-[0.65rem]';
+        noteItem.innerHTML = `
+          <p class="text-gray-400">Created: ${new Date(note.timestamp).toLocaleString()}</p>
+          <p class="text-gray-200">${note.content}</p>
+          <div class="flex gap-1 mt-1">
+            <button onclick="openNotePopup(${note.id})" class="flex-1 bg-gray-600 text-gray-200 p-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.414H9v-2.828l8.586-8.586z"></path></svg>
+              Edit
+            </button>
+            <button onclick="deleteNote(${note.id})" class="flex-1 bg-gray-600 text-gray-200 p-1 rounded-lg hover:bg-gray-500 transition text-[0.65rem] flex items-center justify-center gap-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+              Delete
+            </button>
+          </div>
+        `;
+        notesList.appendChild(noteItem);
+      });
     }
 
     // Pomodoro Timer
@@ -663,16 +699,25 @@
     function showAnalytics() {
       document.getElementById('analytics-section').classList.remove('hidden');
       document.getElementById('history-section').classList.add('hidden');
+      document.getElementById('notes-section').classList.add('hidden');
     }
 
     // Show History
     function showHistory() {
       document.getElementById('analytics-section').classList.add('hidden');
       document.getElementById('history-section').classList.remove('hidden');
-      // Set default date to today for last 7 days
+      document.getElementById('notes-section').classList.add('hidden');
       const today = new Date();
       document.getElementById('history-date').value = today.toISOString().split('T')[0];
       loadHistory();
+    }
+
+    // Show Notes
+    function showNotes() {
+      document.getElementById('analytics-section').classList.add('hidden');
+      document.getElementById('history-section').classList.add('hidden');
+      document.getElementById('notes-section').classList.remove('hidden');
+      renderNotes();
     }
 
     // Load History
@@ -744,14 +789,6 @@
               user.dailyExp -= 5;
               showNotification(`Missed deadline for "${task.title}". -5 EXP`, false);
             }
-          }
-          // Check task streak
-          if (task.streakLastDate !== today && task.streakCurrent < Math.floor(task.streakDays * 0.7)) {
-            task.streakCurrent = 0;
-            task.streakLastDate = null;
-            user.exp -= 3;
-            user.dailyExp -= 3;
-            showNotification(`Broke streak for "${task.title}". -3 EXP`, false);
           }
         });
         if (user.dailyTasks === 0) {
